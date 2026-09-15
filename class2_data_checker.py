@@ -20,6 +20,21 @@ def check_data(filename):
 
     return header, data, missing_rows
 
+#----------------------------------
+
+
+import logging
+
+# Set up logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)-8s %(message)s",
+    datefmt="%H:%M:%S"
+)
+# Create a module-level logger
+logger = logging.getLogger(__name__)
+
+
 # TODO 1: Create an ArgumentParser
 parser = argparse.ArgumentParser(
     description="Check the quality of a CSV file."
@@ -56,19 +71,39 @@ parser.add_argument(
 
 args = parser.parse_args()
 
+if args.verbose:
+    logger.setLevel(logging.DEBUG)
+logger.debug("Arguments parsed: filename=args.input")
+
 # Check if the file exists 
 p = Path(args.input)
 if not p.is_file():
-    print(f"File not found: '{args.input}'")
+    logger.error(f"File not found: '{args.input}'")
     sys.exit(1)
-
-print(f"File validated: '{args.input}'")
+    
+logger.info(f"File validated: '{args.input}'")
 
 # Check the data
 header, data, missing_rows = check_data(args.input)
+logger.debug("Loading data from: students.csv")
+
+#step 7
+logger.info("Loaded {len(data)} rows")
+
+#step8
+if len(data) == 0:
+    logger.error("Input file contains no data; cannot continue")
+    sys.exit(1)
+#step9
+for row_number in missing_rows:
+    logger.warning("Row {row_number} has MISSING values")
+
 
 # Save the report
 with open(args.output, "w") as f:
     f.write(f"Number of rows: {len(data)}\n")
     f.write(f"Number of columns: {len(header)}\n")
     f.write(f"Number of rows with missing values: {len(missing_rows)}\n")
+
+#step10
+logger.info("Report saved to {data_quality.txt}")
